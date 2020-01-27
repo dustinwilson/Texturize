@@ -1,0 +1,25 @@
+{
+    "name": "dw/texturize",
+    "description": "Translates ASCII punctuation characters into typographically-correct punctuation",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dustin Wilson",
+            "email": "dustin@dustinwilson.com"
+        }
+    ],
+    "require": {
+        "php": "7.*",
+        "ext-intl": "*",
+        "ext-hash": "*",
+        "ext-dom" : "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "dW\\": [
+                "lib/"
+            ]
+        }
+    }
+}
