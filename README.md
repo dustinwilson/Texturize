@@ -47,6 +47,8 @@ public static function withString(string $data): string;
 
 #### dW\Texturize::withDOM ####
 
+"Texturizes" a given `\DOMDocument` or `\DOMElement`. It is aware of adjacent elements and will successfully translate complex DOM structures.
+
 ```php
 public static function withDOM(\DOMDocument|\DOMElement &$node): \DOMDocument|\DOMElement;
 ```
