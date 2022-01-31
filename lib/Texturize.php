@@ -10,10 +10,10 @@ class Texturize {
 
     // Text nodes which are descendants of these elements won't be selected for
     // texturization
-    protected static array $ignoredAncestors = [ 'code', 'command', 'kbd', 'keygen', 'pre', 'samp', 'script', 'style', 'tt', 'var' ];
+    public static array $ignoredAncestors = [ 'code', 'command', 'kbd', 'keygen', 'pre', 'samp', 'script', 'style', 'tt', 'var' ];
 
     // Attributes which should be texturized
-    protected static array $includedAttributes = [ '@alt', '@aria-label', 'meta[not(@name="viewport")]/@content', '@longdesc', '@rel', '@rev', '@title' ];
+    public static array $includedAttributes = [ '@alt', '@aria-label', 'meta[not(@name="viewport")]/@content', '@longdesc', '@rel', '@rev', '@title' ];
 
     // Regexes used for texturization of curly quotes
     protected static array $curlyQuoteRegexes = [
