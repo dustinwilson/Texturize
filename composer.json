@@ -1,5 +1,5 @@
 {
-    "name": "dw/texturize",
+    "name": "dustinwilson/texturize",
     "description": "Translates ASCII punctuation characters into typographically-correct punctuation",
     "type": "library",
     "license": "MIT",
@@ -10,9 +10,7 @@
         }
     ],
     "require": {
-        "php": "7.*",
-        "ext-intl": "*",
-        "ext-hash": "*",
+        "php": ">=8.0.2",
         "ext-dom" : "*"
     },
     "autoload": {

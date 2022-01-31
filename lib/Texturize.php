@@ -4,19 +4,19 @@ namespace dW;
 
 class Texturize {
     // Flags for toggling features
-    public static $curlyQuotes = true;
-    public static $dashes = true;
-    public static $ellipses = true;
+    public static bool $curlyQuotes = true;
+    public static bool $dashes = true;
+    public static bool $ellipses = true;
 
     // Text nodes which are descendants of these elements won't be selected for
     // texturization
-    protected static $ignoredAncestors = [ 'code', 'command', 'kbd', 'keygen', 'pre', 'samp', 'script', 'style', 'tt', 'var' ];
+    protected static array $ignoredAncestors = [ 'code', 'command', 'kbd', 'keygen', 'pre', 'samp', 'script', 'style', 'tt', 'var' ];
 
     // Attributes which should be texturized
-    protected static $includedAttributes = [ '@alt', '@aria-label', 'meta[not(@name="viewport")]/@content', '@longdesc', '@rel', '@rev', '@title' ];
+    protected static array $includedAttributes = [ '@alt', '@aria-label', 'meta[not(@name="viewport")]/@content', '@longdesc', '@rel', '@rev', '@title' ];
 
     // Regexes used for texturization of curly quotes
-    protected static $curlyQuoteRegexes = [
+    protected static array $curlyQuoteRegexes = [
         [ '/(\0)?\'(\0)?(bout|cause|nuff|round|tain\'t|til|tis|twas|twere|twill|em)/S',
           '/(\0)?\'(\0)?([\0\d]+(?:\')?\0?s)/S',
           '/^(\0)?\'(\0)?(?=[[:punct:]]\0?\B)/S',
@@ -34,7 +34,7 @@ class Texturize {
     ];
 
     // Regexes used for texturization of dashes
-    protected static $dashRegexes = [
+    protected static array $dashRegexes = [
         [ '/(?<!xn)(?<!-)(\0)?--(\0)?(?!-)/S',
           '/(?<!xn)(?<!-)(\0)?---(\0)?(?!-)/S' ],
         [ '$1—$2',
@@ -42,7 +42,7 @@ class Texturize {
     ];
 
     // Regexes used for texturization of ellipses
-    protected static $ellipsisRegexes = [
+    protected static array $ellipsisRegexes = [
         [ '/(\0)?(?:\.\.\.|\. \. \.)(\0)?/S' ],
         [ '$1…$2' ]
     ];
@@ -63,27 +63,28 @@ class Texturize {
 
         return $data;
     }
-    
-    public static function withDOM(\DOMDocument &$data): \DOMDocument {
-        // Select all text nodes in the document which aren't descendants of the
-        // 'ignored' elements defined above.
-        $xpath = new \DOMXPath($data);
-        $query = '//text()';
+
+    public static function withDOM(\DOMDocument|\DOMElement &$node): \DOMDocument|\DOMElement {
+        // Select all text nodes which aren't descendants of the 'ignored' elements
+        // defined above.
+        $doc = ($node instanceof \DOMDocument) ? $node : $node->ownerDocument;
+        $xpath = new \DOMXPath($doc);
+        $query = './/text()';
         foreach (self::$ignoredAncestors as $i) {
             $query .= "[not(ancestor::$i)]";
         }
 
-        $nodes[0] = $xpath->query($query);
+        $nodes[0] = $xpath->query($query, $node);
 
         // Select all attributes in the document which are the 'included'
         // attributes defined above.
         $query = '';
         foreach (self::$includedAttributes as $i) {
-            $query .= "//$i | ";
+            $query .= ".//$i | ";
         }
         $query = rtrim($query, ' |');
 
-        $nodes[1] = $xpath->query($query);
+        $nodes[1] = $xpath->query($query, $node);
 
         foreach ($nodes as $i => $n) {
             // Iterate through the DOMNodeList and implode it into a string
@@ -94,19 +95,18 @@ class Texturize {
             // text nodes.
             $imploded = '';
             foreach ($n as $n2) {
-                $imploded .= (($i === 0) ? $n2->data : $n2->value) . chr(0);
+                $imploded .= (($i === 0) ? $n2->data : $n2->value) . "\0";
             }
 
-            $imploded = rtrim($imploded, chr(0));
+            $imploded = rtrim($imploded, "\0");
             $imploded2 = self::withString($imploded);
             if ($imploded === $imploded2) {
-                return $data;
+                return $node;
             }
 
-            $exploded = explode(chr(0), $imploded2);
+            $exploded = explode("\0", $imploded2);
 
-            for ($j = 0; $j < count($exploded); $j++) {
-                $e = $exploded[$j];
+            foreach ($exploded as $j => $e) {
                 $x = $n->item($j);
 
                 if ($e !== (($i === 0) ? $x->data : $x->value)) {
@@ -115,8 +115,7 @@ class Texturize {
             }
         }
 
-        // Return the DOMDocument out of convenience, but it is edited in place
-        // anyway.
-        return $data;
+        // Return the node out of convenience, but it is edited in place anyway.
+        return $node;
     }
 }
